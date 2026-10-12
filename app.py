@@ -31,56 +31,49 @@ def extract_features(image_path):
     return features.reshape(1, -1)
 
 
+
 @app.route("/", methods=["GET", "POST"])
 def home():
-
     prediction = None
     probability = None
+    error = None
+    page = "spiral" if request.method == "POST" else "dashboard"
 
     if request.method == "POST":
-
         if "spiral" not in request.files:
-            return render_template(
-                "index.html",
-                error="Please upload a spiral image."
-            )
+            error = "Please upload a spiral image."
+        else:
+            file = request.files["spiral"]
 
-        file = request.files["spiral"]
-
-        if file.filename == "":
-            return render_template(
-                "index.html",
-                error="Please choose an image."
-            )
-
-        upload_dir = ROOT / "uploads"
-        upload_dir.mkdir(exist_ok=True)
-
-        image_path = upload_dir / file.filename
-        file.save(image_path)
-
-        try:
-            features = extract_features(image_path)
-
-            probability = float(
-                MODEL.predict_proba(features)[0, 1]
-            )
-
-            if probability >= 0.5:
-                prediction = "Parkinson's risk pattern detected"
+            if file.filename == "":
+                error = "Please choose an image."
             else:
-                prediction = "Healthy pattern detected"
+                upload_dir = ROOT / "uploads"
+                upload_dir.mkdir(exist_ok=True)
 
-        except Exception as e:
-            return render_template(
-                "index.html",
-                error=f"Could not analyze image: {e}"
-            )
+                image_path = upload_dir / file.filename
+                file.save(image_path)
+
+                try:
+                    features = extract_features(image_path)
+                    probability = float(
+                        MODEL.predict_proba(features)[0, 1]
+                    )
+
+                    if probability >= 0.5:
+                        prediction = "Parkinson's risk pattern detected"
+                    else:
+                        prediction = "Healthy pattern detected"
+
+                except Exception as e:
+                    error = f"Could not analyze image: {e}"
 
     return render_template(
         "index.html",
         prediction=prediction,
-        probability=probability
+        probability=probability,
+        error=error,
+        page=page
     )
 
 

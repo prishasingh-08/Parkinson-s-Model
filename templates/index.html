@@ -1,140 +1,63 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Parkinson's Spiral Screening</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 650px;
-            margin: auto;
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        input {
-            margin: 20px 0;
-        }
-
-        button {
-            display: block;
-            margin: 20px auto;
-            padding: 12px 28px;
-            border: none;
-            border-radius: 8px;
-            background: #222;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            opacity: 0.85;
-        }
-
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 10px;
-            background: #eef2f5;
-        }
-
-        .warning {
-            color: #b00020;
-        }
-
-        .note {
-            margin-top: 30px;
-            font-size: 13px;
-            color: #777;
-        }
-    </style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9eee4"><title>NeuroCare | Parkinson's Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body>
+  <div id="authView" class="auth-view" hidden>
+    <div class="auth-art"><a class="brand brand-light" href="#" data-page="dashboard"><span class="brand-symbol">❋</span><span>NeuroCare<small>PARKINSON'S MONITORING</small></span></a><div class="auth-art-copy"><p class="eyebrow">YOUR JOURNEY, YOUR PACE</p><h2>Monitor today.<br>Understand tomorrow.</h2><p>A thoughtful space to keep your assessments, observations and progress together.</p></div><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div></div>
+    <div class="auth-panel"><button class="icon-btn auth-back" id="authBack" aria-label="Back to dashboard">←</button><div class="auth-card"><div class="brand auth-brand"><span class="brand-symbol">❋</span><span>NeuroCare<small>PARKINSON'S MONITORING</small></span></div><p class="eyebrow" id="authEyebrow">WELCOME BACK</p><h1 id="authTitle">Sign in to your space</h1><p class="muted" id="authSubtitle">Your personal assessment history, all in one place.</p><form id="authForm"><label for="authEmail">Email address</label><input id="authEmail" type="email" placeholder="you@example.com" required><label for="authPassword">Password</label><input id="authPassword" type="password" placeholder="Enter your password" required minlength="4"><div id="signupExtra" hidden><label for="authName">Full name</label><input id="authName" type="text" placeholder="Your name"></div><div class="auth-row"><label class="check-label"><input type="checkbox"> Remember me</label><button type="button" class="text-btn" id="forgotBtn">Forgot password?</button></div><button class="btn btn-primary full" type="submit" id="authSubmit">Sign in</button></form><p class="auth-switch" id="authSwitch">New to NeuroCare? <button class="text-btn" id="switchAuth">Create an account</button></p><p class="tiny-note">Demo interface only. Account authentication must be connected before real patient data is stored.</p></div></div>
+  </div>
 
-<div class="container">
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand brand-light side-brand" href="#dashboard" data-page="dashboard"><span class="brand-symbol">❋</span><span>NeuroCare<small>MONITORING & SCREENING</small></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span> Dashboard</button>
+        <button class="nav-item" data-page="spiral"><span>◎</span> Spiral analysis</button>
+        <button class="nav-item" data-page="gait"><span>♙</span> Gait analysis <i class="soon-dot"></i></button>
+        <button class="nav-item" data-page="voice"><span>♫</span> Voice analysis <i class="soon-dot"></i></button>
+        <button class="nav-item" data-page="history"><span>▤</span> Assessment history</button>
+      </nav>
+      <div class="side-label side-label-lower">YOUR SPACE</div>
+      <nav class="side-nav"><button class="nav-item" data-page="profile"><span>♙</span> My profile</button><button class="nav-item" data-page="settings"><span>⚙</span> Settings</button><button class="nav-item" data-page="about"><span>ⓘ</span> About NeuroCare</button></nav>
+      <div class="sidebar-bottom"><div class="privacy-chip"><span>✳</span><div><strong>Your privacy matters</strong><small>Keep your health data safe.</small></div></div><button class="nav-item logout-btn" id="openLogin"><span>↪</span> Sign in / account</button><div class="side-footer">A supportive tool, not a diagnosis.</div></div>
+    </aside>
 
-    <h1>Parkinson's Spiral Screening</h1>
+    <main class="main-area">
+      <header class="topbar"><button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Open navigation">☰</button><div class="breadcrumb"><span>NeuroCare</span><span class="crumb-sep">/</span><strong id="crumbCurrent">Dashboard</strong></div><div class="top-actions"><button class="icon-btn" id="reminderBtn" aria-label="Reminders" title="Reminders">♧</button><button class="icon-btn" id="profileShortcut" aria-label="Profile" title="Profile">⚙</button><button class="avatar" id="avatarShortcut" title="My profile">P</button></div></header>
+      <div class="page-wrap">
+        <section class="page {% if page != 'spiral' %}active{% endif %}" id="page-home">
+          <div class="welcome-row"><div><p class="eyebrow">YOUR PERSONAL OVERVIEW</p><h1>Good day<span id="welcomeName">, there</span> <span class="wave">✳</span></h1><p class="muted">Your assessments and progress, gathered in one calm space.</p></div><button class="btn btn-outline" id="dashboardReminder">＋ Set a reminder</button></div>
+          <div class="stat-grid"><article class="stat-card"><div class="stat-icon sage-icon">▤</div><div><p>Assessments recorded</p><h2 id="assessmentCount">0</h2><small>Saved on this device in this demo</small></div></article><article class="stat-card"><div class="stat-icon sand-icon">▦</div><div><p>Last assessment</p><h2 class="stat-date" id="lastAssessment">Not yet</h2><small id="lastAssessmentType">Ready when you are</small></div></article><article class="stat-card"><div class="stat-icon lavender-icon">♧</div><div><p>Next reminder</p><h2 class="stat-date" id="nextReminder">Not set</h2><small>Choose a time that suits you</small></div></article></div>
+          <div class="section-heading"><div><p class="eyebrow">ASSESSMENT TOOLS</p><h2>Where would you like to begin?</h2></div><span class="muted small-text">Choose a module</span></div>
+          <div class="module-grid"><button class="module-card" data-page="spiral"><div class="module-top"><span class="module-icon">◎</span><span class="arrow-circle">↗</span></div><h3>Spiral analysis</h3><p>Upload a handwritten spiral drawing for pattern analysis using the available model.</p><span class="module-link">Open analysis <b>→</b></span><span class="module-tag available">Prototype available</span></button><button class="module-card" data-page="gait"><div class="module-top"><span class="module-icon gait-icon">♙</span><span class="arrow-circle">↗</span></div><h3>Gait analysis</h3><p>A future space for walking videos and movement-related assessments.</p><span class="module-link">Explore module <b>→</b></span><span class="module-tag upcoming">Coming soon</span></button><button class="module-card" data-page="voice"><div class="module-top"><span class="module-icon voice-icon">♫</span><span class="arrow-circle">↗</span></div><h3>Voice analysis</h3><p>A future space for voice recordings and speech-characteristic analysis.</p><span class="module-link">Explore module <b>→</b></span><span class="module-tag upcoming">Coming soon</span></button></div>
+          <div class="dashboard-lower"><article class="panel progress-panel"><div class="panel-heading"><div><p class="eyebrow">YOUR JOURNEY</p><h2>Assessment activity</h2></div><button class="text-btn" data-page="history">View history →</button></div><div class="chart-area" id="activityChart"><div class="chart-empty"><span>↗</span><strong>Your progress takes shape over time.</strong><p>Complete an assessment to start building your personal history.</p></div></div><div class="chart-legend"><span><i class="legend-dot spiral-dot"></i>Spiral</span><span><i class="legend-dot gait-dot"></i>Gait</span><span><i class="legend-dot voice-dot"></i>Voice</span></div></article><article class="panel recent-panel"><div class="panel-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Latest assessments</h2></div><button class="text-btn" data-page="history">View all →</button></div><div id="recentList" class="recent-list"><div class="empty-state"><span>▤</span><p>No assessments yet.</p><small>Your saved assessments will appear here.</small></div></div></article></div>
+          <div class="disclaimer"><span>ⓘ</span><p><strong>A note about your results</strong><br>NeuroCare is a screening and tracking prototype. It cannot diagnose Parkinson’s disease or replace advice from a qualified healthcare professional.</p></div>
+        </section>
 
-    <p class="subtitle">
-        Upload a spiral drawing for AI-based research screening.
-    </p>
+        <section class="page {% if page == 'dashboard' or page is not defined %}active{% endif %}" id="page-dashboard"><div class="page-heading"><div><p class="eyebrow">ASSESSMENT MODULE 01</p><h1>Spiral analysis</h1><p class="muted">Upload a handwritten spiral image to run the currently available model.</p></div><span class="module-tag available">Prototype available</span></div><div class="analysis-layout"><article class="panel upload-panel"><div class="panel-heading"><div><h2>Upload your drawing</h2><p class="muted">Use a clear image with the full drawing visible.</p></div><span class="step-pill">STEP 01</span></div><form action="/" method="POST" enctype="multipart/form-data" id="spiralForm"><label class="dropzone" id="dropzone" for="spiralInput"><span class="upload-symbol">↑</span><strong>Drop your image here</strong><span class="muted">or choose a file from your device</span><span class="btn btn-outline browse-btn">Choose image</span><small>Accepted formats: JPG, JPEG, PNG</small><input type="file" id="spiralInput" name="spiral" accept="image/png,image/jpeg,.jpg,.jpeg,.png" required></label><div class="file-preview" id="filePreview" hidden><img id="previewImage" alt="Selected spiral preview"><div class="file-info"><strong id="fileName">Selected image</strong><small id="fileSize"></small></div><button type="button" class="text-btn" id="removeFile">Remove</button></div><button type="submit" class="btn btn-primary full analyze-btn"><span>Run spiral analysis</span><span>→</span></button></form><div class="how-box"><strong><span>ⓘ</span> Before you begin</strong><p>Use a drawing made by the person being assessed. Ensure good lighting and avoid cropping the spiral. This prototype's output is not a diagnosis.</p></div></article><article class="panel result-panel"><div class="panel-heading"><div><p class="eyebrow">ASSESSMENT OUTPUT</p><h2>Your result</h2></div><span class="result-symbol">✳</span></div>{% if prediction is defined and prediction %}<div class="result-live"><span class="result-label">MODEL OUTPUT</span><h3>{{ prediction }}</h3>{% if probability is defined and probability is not none %}<p class="result-prob">Model score: {{ '%.1f'|format(probability * 100 if probability <= 1 else probability) }}%</p>{% endif %}<p class="result-note">This is a model-generated screening output, not a medical diagnosis. Discuss health concerns with a qualified professional.</p><button class="btn btn-outline full" type="button" id="saveResult">Save to this browser's demo history</button></div>{% elif error %}<div class="result-message error-message"><span>!</span><strong>We couldn't analyse that image</strong><p>{{ error }}</p><p>Please check the file and try again.</p></div>{% else %}<div class="result-placeholder"><div class="result-illustration"><svg viewBox="0 0 200 200" role="img" aria-label="Decorative spiral illustration"><circle cx="100" cy="100" r="74" fill="none" stroke="#dfe6d9" stroke-width="1.5"/><circle cx="100" cy="100" r="55" fill="none" stroke="#dfe6d9" stroke-width="1.5"/><circle cx="100" cy="100" r="36" fill="none" stroke="#c4d1bd" stroke-width="2"/><path d="M100 100 C100 89 116 89 116 101 C116 119 87 120 82 99 C76 70 121 60 139 87 C163 124 124 153 91 139 C54 124 57 73 90 55 C132 33 170 69 164 111" fill="none" stroke="#607a60" stroke-width="2.5" stroke-linecap="round"/></svg></div><h3>Your result will appear here</h3><p>After you upload a drawing and run the analysis, the model output will be shown in this space.</p></div>{% endif %}</article></div><div class="disclaimer"><span>ⓘ</span><p><strong>Important</strong><br>Model scores are not necessarily calibrated probabilities of disease. Performance depends on the training data and model limitations.</p></div></section>
 
-    <form method="POST" enctype="multipart/form-data">
+        <section class="page" id="page-gait"><div class="page-heading"><div><p class="eyebrow">ASSESSMENT MODULE 02</p><h1>Gait analysis</h1><p class="muted">A future space for movement assessments and walking-pattern tracking.</p></div><span class="module-tag upcoming">Coming soon</span></div><div class="coming-card panel"><div class="coming-art"><span class="big-module-icon">♙</span><span class="orbit orbit-a"></span><span class="orbit orbit-b"></span></div><div class="coming-copy"><p class="eyebrow">IN DEVELOPMENT</p><h2>Movement, observed over time.</h2><p>When a validated gait model is available, this module can support video upload, movement measurements and dated assessment history.</p><div class="coming-features"><span>✓ Video upload interface</span><span>✓ Assessment history design</span><span>○ Gait analysis model not connected</span></div><button class="btn btn-primary" data-page="dashboard">Back to dashboard</button></div></div><p class="small-muted">No gait analysis is performed by this prototype at present.</p></section>
 
-        <input
-            type="file"
-            name="spiral"
-            accept=".jpg,.jpeg,.png"
-            required
-        >
+        <section class="page" id="page-voice"><div class="page-heading"><div><p class="eyebrow">ASSESSMENT MODULE 03</p><h1>Voice analysis</h1><p class="muted">A future space for voice samples and speech-characteristic tracking.</p></div><span class="module-tag upcoming">Coming soon</span></div><div class="coming-card panel"><div class="coming-art voice-art"><span class="big-module-icon">♫</span><div class="waveform"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="coming-copy"><p class="eyebrow">IN DEVELOPMENT</p><h2>A voice is more than a sound.</h2><p>When an appropriate model is ready, this module can support voice recording or audio upload and track model outputs across assessments.</p><div class="coming-features"><span>✓ Recording interface concept</span><span>✓ History page design</span><span>○ Voice analysis model not connected</span></div><button class="btn btn-primary" data-page="dashboard">Back to dashboard</button></div></div><p class="small-muted">No voice analysis or recording is performed by this prototype at present.</p></section>
 
-        <button type="submit">
-            Analyze Spiral
-        </button>
+        <section class="page" id="page-history"><div class="page-heading"><div><p class="eyebrow">YOUR RECORD</p><h1>Assessment history</h1><p class="muted">Review the activity saved in this browser's demo history.</p></div><button class="btn btn-outline" id="exportHistory">↓ Export CSV</button></div><div class="panel history-panel"><div class="history-toolbar"><label class="search-box">⌕ <input id="historySearch" type="search" placeholder="Search assessments..."></label><select id="historyFilter" aria-label="Filter assessments"><option value="all">All modules</option><option value="Spiral analysis">Spiral analysis</option><option value="Gait analysis">Gait analysis</option><option value="Voice analysis">Voice analysis</option></select></div><div class="table-scroll"><table><thead><tr><th>DATE</th><th>ASSESSMENT</th><th>MODEL OUTPUT</th><th>RECORD</th></tr></thead><tbody id="historyRows"><tr><td colspan="4" class="table-empty">No saved assessments yet. Run a spiral analysis and save its result to begin.</td></tr></tbody></table></div><p class="tiny-note">History is stored only in this browser for demonstration. It is not secure clinical storage and does not sync between devices.</p></div></section>
 
-    </form>
+        <section class="page" id="page-profile"><div class="page-heading"><div><p class="eyebrow">YOUR SPACE</p><h1>My profile</h1><p class="muted">Manage the details shown in your local demo profile.</p></div></div><div class="profile-layout"><article class="panel profile-card"><div class="profile-cover"></div><div class="profile-main"><div class="profile-avatar" id="profileAvatar">P</div><h2 id="profileDisplayName">Your name</h2><p class="muted" id="profileDisplayEmail">you@example.com</p><span class="module-tag available">Personal account</span></div><form id="profileForm" class="profile-form"><label for="profileName">Full name</label><input id="profileName" type="text" placeholder="Your name"><label for="profileEmail">Email address</label><input id="profileEmail" type="email" placeholder="you@example.com"><button class="btn btn-primary" type="submit">Save profile</button></form></article><article class="panel profile-info"><p class="eyebrow">YOUR INFORMATION</p><h2>A little about your space</h2><p class="muted">NeuroCare is designed to help you keep track of screening assessments and observations over time.</p><div class="info-row"><span>Account mode</span><strong>Frontend demo</strong></div><div class="info-row"><span>History storage</span><strong>This browser only</strong></div><div class="info-row"><span>Clinical diagnosis</span><strong>Not provided</strong></div><div class="privacy-note"><span>♡</span><p>Do not enter sensitive medical information into this demo. A secure backend and real authentication are required for production use.</p></div></article></div></section>
 
+        <section class="page" id="page-settings"><div class="page-heading"><div><p class="eyebrow">PREFERENCES</p><h1>Settings</h1><p class="muted">Make this space feel comfortable for you.</p></div></div><div class="settings-stack"><article class="panel settings-card"><div class="settings-icon">♧</div><div class="settings-copy"><h3>Assessment reminders</h3><p class="muted">Set an optional reminder to check in with your assessment routine.</p><div class="reminder-controls"><label for="reminderDate">Date</label><input type="date" id="reminderDate"><label for="reminderTime">Time</label><input type="time" id="reminderTime"><button class="btn btn-primary" id="saveReminder" type="button">Save reminder</button><button class="btn btn-outline" id="clearReminder" type="button">Clear</button></div><small class="small-muted" id="reminderStatus">No reminder set. This demo cannot send notifications while closed.</small></div></article><article class="panel settings-card"><div class="settings-icon">◐</div><div class="settings-copy"><h3>Appearance</h3><p class="muted">NeuroCare uses a calm sage and ivory palette for a soft, readable experience.</p><span class="palette-chip"><i></i><i></i><i></i><i></i> Sage · Ivory · Forest</span></div></article><article class="panel settings-card"><div class="settings-icon">♧</div><div class="settings-copy"><h3>Privacy & data</h3><p class="muted">Profile details and saved demo history remain in this browser's local storage. Do not use this as a secure medical record.</p><button class="btn btn-outline" id="clearLocalData" type="button">Clear local demo data</button></div></article></div></section>
 
-    {% if prediction %}
-
-    <div class="result">
-
-        <h2>{{ prediction }}</h2>
-
-        {% if probability is not none %}
-
-        <p>
-            Parkinson probability:
-            <strong>{{ "%.1f"|format(probability * 100) }}%</strong>
-        </p>
-
-        {% endif %}
-
-    </div>
-
-    {% endif %}
-
-
-    {% if error %}
-
-    <div class="result">
-        <p class="warning">{{ error }}</p>
-    </div>
-
-    {% endif %}
-
-
-    <p class="note">
-        This is a research/educational screening model and
-        is not a medical diagnosis.
-    </p>
-
-</div>
-
-</body>
-
-</html>
+        <section class="page" id="page-about"><div class="page-heading"><div><p class="eyebrow">OUR PURPOSE</p><h1>About NeuroCare</h1><p class="muted">A student prototype exploring multimodal Parkinson’s screening and progress tracking.</p></div></div><div class="about-hero panel"><span class="about-flower">❋</span><p class="eyebrow">SCREENING · TRACKING · AWARENESS</p><h2>Technology can support a conversation.<br>It cannot replace a clinician.</h2><p>NeuroCare brings together a spiral-image model and planned gait and voice assessment modules in one interface. The goal is to make assessment history easier to organise and understand, while being transparent about what the technology can and cannot do.</p></div><div class="about-grid"><article class="panel"><span>◎</span><h3>Spiral analysis</h3><p>Connects to the current image-based model in this project.</p></article><article class="panel"><span>♙</span><h3>Gait analysis</h3><p>Planned module. No working model is connected yet.</p></article><article class="panel"><span>♫</span><h3>Voice analysis</h3><p>Planned module. No working model is connected yet.</p></article></div><div class="disclaimer"><span>ⓘ</span><p><strong>For research and educational use</strong><br>This application is not a medical device, does not provide a diagnosis, and should not be used to make treatment decisions.</p></div></section>
+        <footer class="app-footer"><span>❋ NeuroCare</span><span>Designed with care · For research and educational use</span></footer>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body></html>
