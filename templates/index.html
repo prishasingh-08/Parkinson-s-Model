@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Parkinson's Spiral Screening</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        input {
+            margin: 20px 0;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #eef2f5;
+        }
+
+        .warning {
+            color: #b00020;
+        }
+
+        .note {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Parkinson's Spiral Screening</h1>
+
+    <p class="subtitle">
+        Upload a spiral drawing for AI-based research screening.
+    </p>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <input
+            type="file"
+            name="spiral"
+            accept=".jpg,.jpeg,.png"
+            required
+        >
+
+        <button type="submit">
+            Analyze Spiral
+        </button>
+
+    </form>
+
+
+    {% if prediction %}
+
+    <div class="result">
+
+        <h2>{{ prediction }}</h2>
+
+        {% if probability is not none %}
+
+        <p>
+            Parkinson probability:
+            <strong>{{ "%.1f"|format(probability * 100) }}%</strong>
+        </p>
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+
+    {% if error %}
+
+    <div class="result">
+        <p class="warning">{{ error }}</p>
+    </div>
+
+    {% endif %}
+
+
+    <p class="note">
+        This is a research/educational screening model and
+        is not a medical diagnosis.
+    </p>
+
+</div>
+
+</body>
+
+</html>

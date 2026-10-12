@@ -1,0 +1,21 @@
+
+# Python environment
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local uploads and temporary files
+uploads/
+*.log
+
+# OS metadata
+.DS_Store
+__MACOSX/
+
+# Local dataset files
+HealthySpiral/
+PatientSpiral/
+NewSpiral.csv
+HealthySpiral.zip
+PatientSpiral.zip
