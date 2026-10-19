@@ -1,0 +1,38 @@
+{
+  "dataset": "Voice Samples for Patients with Parkinson's Disease and Healthy Controls (Figshare, CC BY 4.0)",
+  "input": "WAV, sustained vowel /a/",
+  "subjects": 81,
+  "healthy": 41,
+  "parkinson": 40,
+  "validation": "Nested 5-fold participant-level out-of-fold evaluation; feature count selected only within each outer training fold",
+  "feature_count": 41,
+  "selected_features": 4,
+  "outer_fold_selected_features": [
+    10,
+    6,
+    6,
+    4,
+    4
+  ],
+  "final_fit_feature_count_selection_cv_roc_auc": {
+    "4": 0.8396341463414634,
+    "6": 0.8292682926829268,
+    "8": 0.8280487804878048,
+    "10": 0.825,
+    "12": 0.8219512195121951
+  },
+  "accuracy": 0.7654320987654321,
+  "f1": 0.759493670886076,
+  "roc_auc": 0.8445121951219513,
+  "confusion_matrix_rows_healthy_parkinson_cols_healthy_parkinson": [
+    [
+      32,
+      9
+    ],
+    [
+      10,
+      30
+    ]
+  ],
+  "note": "Small research dataset; nested cross-validation scores are research estimates and the output is not a calibrated clinical probability or diagnosis."
+}

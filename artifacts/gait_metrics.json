@@ -1,0 +1,39 @@
+{
+  "dataset": "PhysioNet Gait in Parkinson's Disease (GaitPDB), Open Data Commons Attribution 1.0",
+  "source": "https://physionet.org/content/gaitpdb/1.0.0/",
+  "input": "100 Hz insole vertical-force recording, 19 columns (time + 18 force channels)",
+  "subjects": 165,
+  "healthy": 72,
+  "parkinson": 93,
+  "validation": "Nested 5-fold participant-level out-of-fold evaluation; feature count selected only within each outer training fold; one usual-walk record per participant",
+  "selected_features": 48,
+  "outer_fold_selected_features": [
+    48,
+    10,
+    32,
+    32,
+    10
+  ],
+  "final_fit_feature_count_selection_cv_roc_auc": {
+    "6": 0.793757467144564,
+    "10": 0.8185483870967742,
+    "16": 0.8275089605734768,
+    "24": 0.8318399044205496,
+    "32": 0.8328853046594982,
+    "48": 0.8406511350059737
+  },
+  "accuracy": 0.7090909090909091,
+  "f1": 0.7362637362637363,
+  "roc_auc": 0.8124253285543608,
+  "confusion_matrix_rows_healthy_parkinson_cols_healthy_parkinson": [
+    [
+      50,
+      22
+    ],
+    [
+      26,
+      67
+    ]
+  ],
+  "note": "Small-sample research baseline only. Nested cross-validation is an estimate, not external clinical validation. It requires compatible insole force sensors and is not a diagnosis; results may not generalize to other sensors or populations."
+}
