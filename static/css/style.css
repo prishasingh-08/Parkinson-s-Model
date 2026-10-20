@@ -7,3 +7,173 @@
 input[type=file]{max-width:100%}
 .demo-login-box{display:grid;gap:8px;margin:20px 0;padding:14px;background:var(--sage-pale);border:1px solid var(--line);border-radius:13px}.demo-login-box .eyebrow{margin:0 0 2px}.demo-login-box small{font-size:9px;line-height:1.55;color:var(--muted)}.weighted-summary{padding:19px 22px;margin-bottom:16px}.weighted-summary h2{margin:3px 0 8px;color:var(--forest)}.weighted-summary p{font-size:11px;margin-bottom:8px}.weighted-summary small{font-size:9px;color:var(--muted)}.demo-notice{margin:0 0 22px}
 .sample-links{display:grid;gap:5px;margin:15px 0 18px;padding:12px 14px;background:#fbfaf5;border:1px solid var(--line);border-radius:12px;font-size:10px}.sample-links a{display:inline;color:var(--sage-dark);font-weight:700;text-decoration:underline;text-underline-offset:2px}.sample-links small{font-size:9px;color:var(--muted);line-height:1.5}
+
+/* NeuroCare spiral drawing canvas */
+.input-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.method-tab {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--forest-2);
+  padding: 10px 13px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.method-tab.active {
+  background: var(--sage-pale);
+  border-color: #b9c9af;
+  color: var(--forest);
+}
+.drawing-workspace { margin-top: 8px; }
+.canvas-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.canvas-heading strong { font-size: 13px; }
+.canvas-heading p { margin: 4px 0 0; font-size: 10px; }
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 900 / 520;
+  min-height: 210px;
+  overflow: hidden;
+  border: 1px solid #dfe5d8;
+  border-radius: 14px;
+  background: var(--paper);
+}
+#spiralCanvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+  z-index: 1;
+}
+#spiralGuide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+#spiralGuide[hidden] { display: none !important; }
+#spiralGuide path {
+  fill: none;
+  stroke: #b7c8aa;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 8 8;
+  opacity: .8;
+}
+.canvas-hint {
+  position: absolute;
+  z-index: 3;
+  left: 12px;
+  bottom: 10px;
+  pointer-events: none;
+  color: #84917e;
+  background: #fffefaD9;
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+}
+.canvas-hint[hidden] { display: none !important; }
+.canvas-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.canvas-toolbar .btn { padding: 10px 12px; }
+.canvas-note {
+  margin: 10px 0 12px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+.spiral-guide-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 11px 12px;
+  background: var(--sage-pale);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.guide-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--forest-2);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.guide-toggle input { accent-color: var(--sage-dark); }
+.guide-description {
+  flex: 1;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+[hidden] { display: none !important; }
+
+@media (max-width: 560px) {
+  .canvas-frame { min-height: 190px; }
+  .canvas-heading { align-items: flex-start; }
+  .canvas-toolbar .btn { flex: 1; }
+}
+
+
+/* Submitted spiral preview beside the analysis result */
+.submitted-drawing {
+    margin: 0 0 1.25rem;
+    padding: 1rem;
+    border: 1px solid var(--border, #e4e8dc);
+    border-radius: 14px;
+    background: #fff;
+}
+.submitted-drawing img {
+    display: block;
+    width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #fafaf6;
+}
+.submitted-drawing .result-label {
+    margin: 0 0 .75rem;
+}
+.result-live .new-assessment-link {
+    margin-top: .75rem;
+}
+
+
+/* Voice analysis: focus on the result after a successful assessment. */
+.analysis-layout.voice-result-mode {
+  grid-template-columns: minmax(0, 1fr);
+}
+.analysis-layout .upload-panel[hidden] {
+  display: none !important;
+}
+
+/* Gait analysis: focus on the result after a successful assessment. */
+.analysis-layout.gait-result-mode {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.analysis-layout .upload-panel[hidden] {
+  display: none !important;
+}

@@ -1,3 +1,4 @@
+import base64
 from pathlib import Path
 from io import BytesIO
 import json
@@ -151,7 +152,7 @@ def analyze_hog_image(payload):
     return predicted_class, probability
 
 
-def render_result(*, page="spiral", prediction=None, probability=None, error=None, status=200, model_name="ResNet18", model_accuracy=None, model_accuracies=None, spiral_model="resnet18"):
+def render_result(*, page="spiral", prediction=None, probability=None, error=None, status=200, model_name="ResNet18", model_accuracy=None, model_accuracies=None, spiral_model="resnet18", spiral_preview=None):
     page_model_accuracy = MODEL_ACCURACIES.get({"spiral": "Spiral analysis", "voice": "Voice analysis", "gait": "Gait analysis"}.get(page, ""))
     if model_accuracy is not None:
         page_model_accuracy = model_accuracy
@@ -159,6 +160,7 @@ def render_result(*, page="spiral", prediction=None, probability=None, error=Non
         "index.html",
         prediction=prediction,
         probability=probability,
+        spiral_preview=spiral_preview,
         error=error,
         page=page,
         model_name=model_name,
@@ -223,7 +225,8 @@ def home():
         if predicted_class == 1
         else "Healthy pattern detected by the model"
     )
-    return render_result(prediction=prediction, probability=parkinson_score, model_name=model_name, model_accuracy=SPIRAL_ACCURACIES[selected_model], model_accuracies=model_accuracies, spiral_model=selected_model)
+    spiral_preview = "data:image/png;base64," + base64.b64encode(payload).decode("ascii")
+    return render_result(prediction=prediction, probability=parkinson_score, model_name=model_name, model_accuracy=SPIRAL_ACCURACIES[selected_model], model_accuracies=model_accuracies, spiral_model=selected_model, spiral_preview=spiral_preview)
 
 
 @app.post("/analyze/voice")

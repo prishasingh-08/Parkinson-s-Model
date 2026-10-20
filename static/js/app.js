@@ -458,42 +458,87 @@
 
   const input = $('#spiralInput');
   const dropzone = $('#dropzone');
+  const preview = $('#filePreview');
+  const workspace = $('#drawingWorkspace');
+  const canvas = $('#spiralCanvas');
+  const guide = $('#spiralGuide');
+  const ctx = canvas?.getContext('2d');
+  const modeButtons = $$('[data-input-mode]');
+  let drawingMode = 'upload';
+  let strokes = [];
+  let activeStroke = null;
+
+  function paintCanvas() {
+    if (!ctx || !canvas) return;
+    ctx.fillStyle = '#fffefa';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#344b3b';
+    ctx.lineWidth = 5;
+    for (const stroke of strokes) {
+      if (!stroke.length) continue;
+      ctx.beginPath();
+      ctx.moveTo(stroke[0].x, stroke[0].y);
+      for (const point of stroke.slice(1)) ctx.lineTo(point.x, point.y);
+      if (stroke.length === 1) ctx.lineTo(stroke[0].x + 0.1, stroke[0].y + 0.1);
+      ctx.stroke();
+    }
+    if ($('#canvasHint')) $('#canvasHint').hidden = strokes.length > 0;
+  }
+
+  function setMode(mode) {
+    drawingMode = mode;
+    modeButtons.forEach(button => {
+      const active = button.dataset.inputMode === mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    const hasFile = Boolean(input?.files?.length);
+    if (dropzone) dropzone.hidden = mode === 'draw' || hasFile;
+    if (workspace) workspace.hidden = mode !== 'draw';
+    if (preview) preview.hidden = mode !== 'upload' || !hasFile;
+  }
 
   function showFile(file) {
-    if (!file) return;
-
+    if (!file || !input || !preview) return;
     if (
-      !/^image\/(jpeg|png)$/.test(file.type) &&
-      !/\.(jpe?g|png)$/i.test(file.name)
+      (!/^image\/(jpeg|png)$/.test(file.type) &&
+      !/\.(jpe?g|png)$/i.test(file.name)) ||
+      file.size > 12 * 1024 * 1024
     ) {
-      toast('Please choose a JPG or PNG image.');
+      toast('Please choose a JPG or PNG image smaller than 12 MB.');
       input.value = '';
+      setMode('upload');
       return;
     }
-
-    if (file.size > 12 * 1024 * 1024) {
-      toast('Please choose an image smaller than 12 MB.');
-      input.value = '';
-      return;
-    }
-
-    $('#filePreview').hidden = false;
     $('#fileName').textContent = file.name;
     $('#fileSize').textContent = `${(file.size / 1024).toFixed(0)} KB`;
-
     const reader = new FileReader();
-    reader.onload = e => {
-      $('#previewImage').src = e.target.result;
-    };
+    reader.onload = e => { $('#previewImage').src = e.target.result; };
     reader.readAsDataURL(file);
+    setMode('upload');
   }
+
+  modeButtons.forEach(button => button.addEventListener('click', () => {
+    const mode = button.dataset.inputMode;
+    if (mode === 'draw') {
+      if (input) input.value = '';
+      if (preview) preview.hidden = true;
+      $('#previewImage')?.removeAttribute('src');
+      strokes = [];
+      paintCanvas();
+    }
+    setMode(mode);
+  }));
 
   input?.addEventListener('change', () => showFile(input.files[0]));
 
   $('#removeFile')?.addEventListener('click', () => {
     input.value = '';
-    $('#filePreview').hidden = true;
-    $('#previewImage').removeAttribute('src');
+    preview.hidden = true;
+    $('#previewImage')?.removeAttribute('src');
+    setMode('upload');
   });
 
   ['dragenter', 'dragover'].forEach(evt =>
@@ -512,27 +557,113 @@
 
   dropzone?.addEventListener('drop', e => {
     const file = e.dataTransfer.files[0];
-    if (!file) return;
-
+    if (!file || !input) return;
     try {
       const dt = new DataTransfer();
       dt.items.add(file);
       input.files = dt.files;
-    } catch {}
-
+    } catch {
+      toast('Please use Choose file to select this image.');
+      return;
+    }
     showFile(file);
   });
 
+  function canvasPoint(event) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - rect.left) * canvas.width / rect.width,
+      y: (event.clientY - rect.top) * canvas.height / rect.height
+    };
+  }
+
+  canvas?.addEventListener('pointerdown', event => {
+    if (drawingMode !== 'draw') return;
+    event.preventDefault();
+    canvas.setPointerCapture(event.pointerId);
+    activeStroke = [canvasPoint(event)];
+    strokes.push(activeStroke);
+    paintCanvas();
+  });
+
+  canvas?.addEventListener('pointermove', event => {
+    if (!activeStroke) return;
+    event.preventDefault();
+    activeStroke.push(canvasPoint(event));
+    paintCanvas();
+  });
+
+  function finishStroke() { activeStroke = null; }
+  canvas?.addEventListener('pointerup', finishStroke);
+  canvas?.addEventListener('pointercancel', finishStroke);
+  canvas?.addEventListener('lostpointercapture', finishStroke);
+
+  $('#undoStroke')?.addEventListener('click', () => {
+    strokes.pop();
+    activeStroke = null;
+    paintCanvas();
+  });
+
+  $('#clearCanvas')?.addEventListener('click', () => {
+    strokes = [];
+    activeStroke = null;
+    paintCanvas();
+  });
+
+  const guideToggle = $('#toggleSpiralGuide');
+
+  function syncSpiralGuide() {
+    if (!guide || !guideToggle) return;
+    const showGuide = guideToggle.checked;
+    guide.hidden = !showGuide;
+    guide.style.display = showGuide ? '' : 'none';
+  }
+
+  if (guideToggle) {
+    guideToggle.addEventListener('change', syncSpiralGuide);
+    syncSpiralGuide();
+  }
+
+  $('#useDrawing')?.addEventListener('click', () => {
+    if (!canvas || !input || !strokes.length) {
+      toast('Draw a spiral on the canvas first.');
+      return;
+    }
+    canvas.toBlob(blob => {
+      if (!blob) {
+        toast('Could not create your drawing. Please try again.');
+        return;
+      }
+      try {
+        const file = new File([blob], 'hand-drawn-spiral.png', { type: 'image/png' });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        showFile(file);
+        toast('Drawing ready for analysis.');
+      } catch {
+        toast('Your browser could not prepare the drawing for upload.');
+      }
+    }, 'image/png');
+  });
+
   $('#spiralForm')?.addEventListener('submit', e => {
-    if (!input.files.length) {
+    if (!input?.files?.length) {
       e.preventDefault();
-      toast('Choose a spiral image first.');
+      toast('Choose an image or draw a spiral first.');
     } else {
       const button = $('.analyze-btn');
-      button.disabled = true;
-      button.querySelector('span').textContent = 'Analysing…';
+      if (button) {
+        button.disabled = true;
+        const label = button.querySelector('span');
+        if (label) label.textContent = 'Analysing…';
+      }
     }
   });
+
+  if (guide) guide.hidden = true;
+  paintCanvas();
+  setMode('upload');
 
   function saveModelResult(button) {
     const heading =
@@ -566,8 +697,88 @@
     button.addEventListener('click', () => saveModelResult(button))
   );
 
+  const gaitInput = $('#gaitInput');
+  const gaitFilePreview = $('#gaitFilePreview');
+  const gaitFileName = $('#gaitFileName');
+  const gaitFileSize = $('#gaitFileSize');
+  const removeGaitFile = $('#removeGaitFile');
+  const gaitDropzone = gaitInput?.closest('.dropzone');
+
+  const showGaitFile = () => {
+    const file = gaitInput?.files?.[0];
+    if (!file) {
+      if (gaitFilePreview) gaitFilePreview.hidden = true;
+      if (gaitDropzone) gaitDropzone.hidden = false;
+      if (gaitFileName) gaitFileName.textContent = 'Selected sensor file';
+      if (gaitFileSize) gaitFileSize.textContent = '';
+      return;
+    }
+    if (gaitFileName) gaitFileName.textContent = file.name;
+    if (gaitFileSize) gaitFileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+    if (gaitFilePreview) gaitFilePreview.hidden = false;
+    if (gaitDropzone) gaitDropzone.hidden = true;
+  };
+
+  gaitInput?.addEventListener('change', showGaitFile);
+  removeGaitFile?.addEventListener('click', () => {
+    if (gaitInput) gaitInput.value = '';
+    showGaitFile();
+  });
+
   const voiceInput = $('#voiceInput');
   const recordButton = $('#recordVoice');
+  const voiceFilePreview = $('#voiceFilePreview');
+  const voiceFileName = $('#voiceFileName');
+  const voiceFileSize = $('#voiceFileSize');
+  const voiceAudioPreview = $('#voiceAudioPreview');
+  const removeVoiceFile = $('#removeVoiceFile');
+  let voicePreviewUrl = null;
+
+  const showVoiceFile = () => {
+    const file = voiceInput?.files?.[0];
+
+    if (voicePreviewUrl) {
+      URL.revokeObjectURL(voicePreviewUrl);
+      voicePreviewUrl = null;
+    }
+
+    if (!file) {
+      const voiceDropzone = voiceInput?.closest('.dropzone');
+if (voiceDropzone) voiceDropzone.hidden = false;
+      if (voiceFilePreview) voiceFilePreview.hidden = true;
+      if (voiceAudioPreview) {
+        voiceAudioPreview.pause();
+        voiceAudioPreview.removeAttribute('src');
+        voiceAudioPreview.hidden = true;
+      }
+      if (voiceFileName) voiceFileName.textContent = '';
+      if (voiceFileSize) voiceFileSize.textContent = '';
+      return;
+    }
+
+    if (voiceFileName) voiceFileName.textContent = file.name;
+    if (voiceFileSize) {
+      voiceFileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+    }
+    if (voiceFilePreview) voiceFilePreview.hidden = false;
+    const voiceDropzone = voiceInput?.closest('.dropzone');
+if (voiceDropzone) voiceDropzone.hidden = true;
+
+    if (voiceAudioPreview && file.type === 'audio/wav' || voiceAudioPreview && file.name.toLowerCase().endsWith('.wav')) {
+      voicePreviewUrl = URL.createObjectURL(file);
+      voiceAudioPreview.src = voicePreviewUrl;
+      voiceAudioPreview.hidden = false;
+    }
+  };
+
+  voiceInput?.addEventListener('change', showVoiceFile);
+
+  removeVoiceFile?.addEventListener('click', () => {
+    if (voiceInput) voiceInput.value = '';
+    showVoiceFile();
+    if (recordStatus) recordStatus.textContent = 'Recording removed. Choose a WAV file or record again.';
+  });
+
   const recordStatus = $('#recordStatus');
   let recorder;
   let microphone;
